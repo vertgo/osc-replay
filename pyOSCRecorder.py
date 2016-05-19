@@ -37,9 +37,10 @@ if args.outport:
 if (outPort > 0 ):
 	print "passthroughPort:", outPort
 	client = OSCClient()
+	send_address = '127.0.0.1', outPort
+	client.connect( send_address ) 
 
-send_address = '127.0.0.1', outPort
-client.connect( send_address ) 
+
 
 
 if args.filename:
