@@ -1,42 +1,46 @@
 osc-replay
 ======================
 A simple OSC message recorder and replayer.
-Depends on Python, liblo:
+Depends on Python, pyOSC:
  - Python 2.7.3
- - pyliblo-0.9.1
- 	(http://das.nasophon.de/pyliblo/)
- - liblo 0.26
-	(http://liblo.sourceforge.net/)
+ pip install pyOSC
 
-OSCメッセージを受信してログ出力するスクリプトと、そのログを元に記録した時系列でメッセージを再生するスクリプトのセットです。Mac OS X 10.6.8および上記のソフトウェアバージョンで動作確認をしています。
-ローカルマシン上のプロセス間通信を対象としており、ホスト間通信はサポートしていません。
+Almost completely rewritten to use pyOSC from original osc-replay by kohei taniguchi. The original readme is still saved in this repo
+there is almost no common code, but the ideas are similar. This runs on windows as liblo won't run on windows (even using ubuntu bash on windows with build 14342)
+
+
 
 How to use
 ------
-1. Run message receiver and record messages as csv file.
-	./osc-record.py > anyfile.csv
+1. Run message receiver and record messages as 
+	python pyOSCRecorder -f savedMessages.csv
 	
-	To Terminate, kill the process with Ctrl+D.
+usage: pyOSCRecorder.py [-h] [-p PORT] [-o OUTPORT] [-f FILENAME]
+(the outport is currently not implemented, but should be used as a passthrough to another port)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PORT, --port PORT  incoming port number
+  -o OUTPORT, --outport OUTPORT
+                        outgoing (passthrough) port number
+  -f FILENAME, --filename FILENAME
+                        filename
+	
+	To Terminate, kill the process with Ctrl+C
 
 2. Run message sender and send messages with csv file.
-	./osc-replay.py anyfile.csv
+	python pyOSCReplay
+
+
+usage: pyOSCReplay.py [-h] -f FILENAME [-o OUTPORT]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FILENAME, --filename FILENAME
+                        filename
+  -o OUTPORT, --outport OUTPORT
+                        outgoing (passthrough) port number
 
 	The process terminates when it reaches the end of csv.
 
-コンソールから、Pythonスクリプトを起動・停止する要領で実行してください。
 
-
-Paramaters (hard coded in *py)
-------	
-1. osc-record.py
-	- receive-at port number (default 8001)
-	- address-patterns which are accepted and logged (ll.41-51, ll.26-39)
-	
-2. osc-replay.py
-	- send-to port number (default 8001)
-	- address-patterns which are processed to send (ll.61-74)
-		just for now, can handle 'none', 'f', 'ff' osc-messages.(can't handle other types for now.. )
-
-現状諸々、ハードコーディングとなっています。送受信したいアドレスパターンとそのハンドラを、osc-replay.pyに記述する必要があります。ゆくゆくは設定ファイルに外出しするか、どんなメッセージでも捌けるように改修したいところ。
-
-Copyright (C) 2013  kohei taniguchi

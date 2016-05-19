@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import liblo
+#mikechanged import liblo
+from OSC import OSCServer
 import sys
 from datetime import datetime as dt
 import datetime
 
 # config for listening
 listeningPort = 8001
+
+print 'Number of arguments:', len(sys.argv), 'arguments.'
+print 'Argument List:', str(sys.argv)
+
+
 
 # now method
 def now():
@@ -18,8 +24,10 @@ print '%s,INFO:osc-record started.\n' % now()
 
 # create server, listening on given port
 try:
-    server = liblo.Server(listeningPort)
-except liblo.ServerError, err:
+    #mike changedserver = liblo.Server(listeningPort)
+    server = OSCServer( ("localhost", listeningPort) )
+except err:
+	print "error starting server:"
     print str(err)
     sys.exit()
 
@@ -39,19 +47,38 @@ def fallback(path, args, types, src):
         print "argument of type '%s': %s" % (t, a)
 
 # register method taking an int and a float
-server.add_method("/pedal", None, n_callback)
-server.add_method("/steerRight", None, n_callback)
-server.add_method("/steerLeft", None, n_callback)
-server.add_method("/steerReset", None, n_callback)
-server.add_method("/brake", None, n_callback)
 
-server.add_method("/speed", 'f', f_callback)
-server.add_method("/steerAngle", 'f', f_callback)
-server.add_method("/direction", 'f', f_callback)
-server.add_method("/location", 'ff', ff_callback)
+
+
+#mikechanged
+# server.add_method("/pedal", None, n_callback)
+# server.add_method("/steerRight", None, n_callback)
+# server.add_method("/steerLeft", None, n_callback)
+# server.add_method("/steerReset", None, n_callback)
+# server.add_method("/brake", None, n_callback)
+
+# server.add_method("/speed", 'f', f_callback)
+# server.add_method("/steerAngle", 'f', f_callback)
+# server.add_method("/direction", 'f', f_callback)
+# server.add_method("/location", 'ff', ff_callback)
+
+# # register a fallback for unhandled messages
+# server.add_method(None, None, fallback)
+
+
+server.addMsgHandler("/pedal", None, n_callback)
+server.addMsgHandler("/steerRight", None, n_callback)
+server.addMsgHandler("/steerLeft", None, n_callback)
+server.addMsgHandler("/steerReset", None, n_callback)
+server.addMsgHandler("/brake", None, n_callback)
+
+server.addMsgHandler("/speed", 'f', f_callback)
+server.addMsgHandler("/steerAngle", 'f', f_callback)
+server.addMsgHandler("/direction", 'f', f_callback)
+server.addMsgHandler("/location", 'ff', ff_callback)
 
 # register a fallback for unhandled messages
-server.add_method(None, None, fallback)
+server.addMsgHandler(None, None, fallback)
 
 # loop and dispatch messages every 100ms
 while True:
