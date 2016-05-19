@@ -56,11 +56,11 @@ def defaultCallback(path, tags, args, source):
 	curTime = datetime.datetime.now()
 	if firstTime is None:
 		firstTime = curTime
-	timeDifference = (curTime - firstTime).microseconds 
+	timeDifference = (curTime - firstTime)
 	#time difference in microseconds
 	
 	print "got message:", path, "args", args
-	print >>file, '%i,%s %f' % ( timeDifference, path, args[0])
+	print >>file, '%i,%s %f' % ( timeDifference.microseconds + timeDifference.seconds * 1000000, path, args[0])
 
 	msg = OSC.OSCMessage( path )
 	msg.append( args )

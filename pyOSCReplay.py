@@ -8,7 +8,7 @@ import sys
 from datetime import datetime as dt
 import datetime
 import threading
-import sched
+#import sched
 
 outPort = 10000
 
@@ -37,7 +37,8 @@ client.connect( send_address )
 lines = [line.rstrip() for line in open(args.filename)]
 print "numLines:", len(lines)
 firstline = lines[0]
-timestamps = [line.split(',')[0] for line in lines[2:]]
+timestamps = [ int(line.split(',')[0]) for line in lines[2:]]
+numMSGs = len( timestamps )
 
 print "first timestamp:", timestamps[0]
 messages   = [line.split(',')[1] for line in lines[2:]]
@@ -51,12 +52,31 @@ def sendOSCMessage(idx):
 	print "curmessage:", mess
 	client.send( omsg)
 
-# scheduler setup
-s = sched.scheduler(time.time, time.sleep)
-for idx in range(len(messages)):
-	s.enter(float(timestamps[idx])/1000000.0, 1, sendOSCMessage, (idx,))
 
+def checkIndex( nowUSeconds , idx):
+	print "checkIndex: index:", idx, "nowUseconds:", nowUSeconds, ",", timestamps[ idx]
+	if ( int(nowUSeconds) < timestamps[ idx] ):
+		print "returning False"
+		return False
+	else:
+		sendOSCMessage(idx)
+		print "returning True"
+		return True
 
-tStart = time.time()
-s.run()
-tEnd   = time.time()
+curIndex = 0
+
+firstTime = datetime.datetime.now()
+#try:
+while True:
+	curDelta = (datetime.datetime.now() - firstTime);
+	microseconds =  curDelta.microseconds + curDelta.seconds *1000000
+	print "us:", microseconds
+	pastTime = checkIndex(microseconds, curIndex )
+	while( pastTime ):
+		curIndex += 1
+		pastTime = checkIndex(microseconds, curIndex )
+		if (curIndex >= numMSGs):
+				exit()
+		#don't wait, just keep going
+#except:
+#	print "Unexpected error:", sys.exc_info()[0]
