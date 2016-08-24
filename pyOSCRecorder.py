@@ -19,8 +19,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--port", help="incoming port number", type=int)
 parser.add_argument("-o", "--outport", help="outgoing (passthrough) port number", type=int)
 parser.add_argument("-f", "--filename" , help="filename", type=str)
+parser.add_argument("-v", "--verbose", help="verbose outputs (many traces)", action="store_true")
 
 args = parser.parse_args()
+globalArgs = args
 
 
 firstTime = None
@@ -53,13 +55,15 @@ file = open(fileName, 'w')
 
 def defaultCallback(path, tags, args, source):
 	global firstTime
+	global globalArgs
 	curTime = datetime.datetime.now()
 	if firstTime is None:
 		firstTime = curTime
 	timeDifference = (curTime - firstTime)
 	#time difference in microseconds
 	
-	print "got message:", path, "args", args
+	if ( globalArgs.verbose):
+		print "got message:", path, "args", args
 	print >>file, '%i,%s %f' % ( timeDifference.microseconds + timeDifference.seconds * 1000000, path, args[0])
 
 	msg = OSC.OSCMessage( path )
